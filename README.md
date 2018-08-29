@@ -52,7 +52,7 @@ npm run dev
 * [Google Places Service API Reference](https://developers.google.com/maps/documentation/javascript/reference/places-service)
 
 ## Demo
-I have a sample of the app up on my website [here](https://brocktopia.com/notes-at/).
+I have a sample of the app up here: [brocktopia.com/notes-at](https://brocktopia.com/notes-at/).
 
 ## Author
 Brock Henderson [@brocktopia](https://github.com/brocktopia/) ||
