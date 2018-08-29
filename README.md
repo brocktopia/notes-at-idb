@@ -51,7 +51,7 @@ npm run dev
 * [Google Maps API Reference](https://developers.google.com/maps/documentation/javascript/reference/map)
 * [Google Places Service API Reference](https://developers.google.com/maps/documentation/javascript/reference/places-service)
 
-## Sample
+## Demo
 I have a sample of the app up on my website [here](https://brocktopia.com/notes-at/).
 
 ## Author
