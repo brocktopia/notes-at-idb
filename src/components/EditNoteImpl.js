@@ -32,6 +32,7 @@ export default {
       google:null,
       activeView: 'edit-name',
       places:[],
+      placeName:'',
       placesService: null,
       showPlacesDialog: false,
       showMoreButton: false,
@@ -65,6 +66,8 @@ export default {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
+          // clear any loaded places
+          vm.places = [];
           vm.$emit('latlon', latlonObj);
         },
         function(err) {
@@ -90,7 +93,8 @@ export default {
     hasPlace:function(note) {
       return !!(note.place && note.place.name);
     },
-    findPlace: function(placeName) {
+
+    findPlace(placeName) {
       //console.log('NoteEditor.findPlace()');
       let options = {
         location:{
@@ -99,40 +103,52 @@ export default {
         },
         radius:1000
       };
-      if (placeName) {
-        options.keyword = placeName;
+      if (vm.placeName) {
+        options.keyword = vm.placeName;
       }
-      vm.placesService.nearbySearch(options, function (res, status, pagination) {
-        if (status !== 'OK') return;
-        vm.places ? vm.places = vm.places.concat(res) : vm.places = res;
+      // Check to see if places have already been loaded
+      if (this.places.length > 0) {
         vm.showPlacesDialog = true;
-        if (pagination.hasNextPage) {
-          vm.showMoreButton = true;
-          vm.pagination = pagination;
-        } else {
-          vm.showMoreButton = false;
-          vm.pagination = null;
-        }
-      });
+      } else {
+        // Call PlacesService
+        vm.placesService.nearbySearch(options, function (res, status, pagination) {
+          if (status !== 'OK') return;
+          vm.places ? vm.places = vm.places.concat(res) : vm.places = res;
+          vm.showPlacesDialog = true;
+          if (pagination.hasNextPage) {
+            vm.showMoreButton = true;
+            vm.pagination = pagination;
+          } else {
+            vm.showMoreButton = false;
+            vm.pagination = null;
+          }
+        });
+      }
     },
+
     moreSelected: function() {
       //console.log('NoteEditor.moreSelected()');
       if (vm.pagination) {
         vm.pagination.nextPage();
       }
     },
+
     mapMarkerMoved: function(marker) {
       //console.log('NoteEditor.mapMarkerMoved()');
       let latlonObj = {
         lat:  marker.latLng.lat(),
         lng: marker.latLng.lng()
       };
+      // clear any loaded places
+      vm.places = [];
       vm.$emit('latlon', latlonObj);
     },
+
     placesClose: function() {
       //console.log('NoteEditor.placesClose()');
       vm.showPlacesDialog = false;
     },
+
     placeSelected: function(place) {
       //console.log('NoteEdit.placeSelected()');
       let options = {
@@ -159,10 +175,15 @@ export default {
         }
       });
     },
-    placeInputUpdated: function(placeName) {
-      //console.log('NoteEditor.placeInputUpdated()');
-      vm.findPlace(placeName)
+
+    placeInputUpdated: function(name) {
+      //console.log(`NoteEditor.placeInputUpdated() ${name}`);
+      // clear current results
+      vm.places = [];
+      vm.placeName = name;
+      vm.findPlace()
     },
+
     clearPlace: function() {
       //console.log('NoteEditor.clearPlace()');
       vm.$emit('place', null);

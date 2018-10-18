@@ -4,14 +4,12 @@ import router from './router'
 import moment from 'moment'
 import dexie from 'dexie'
 import * as VueGoogleMaps from 'vue2-google-maps'
+import googleConfig from './google-maps-config'
 import './css/style.scss'
 import './assets/svg/symbols.svg'
 
 Vue.use(VueGoogleMaps, {
-  load: {
-    key: 'your-google-api-key',
-    libraries: 'places'
-  }
+  load: googleConfig
 });
 
 let notesDB = new dexie('NotesDB');
@@ -21,12 +19,6 @@ notesDB.version(1).stores({
 });
 
 Vue.prototype.$notesDB = notesDB;
-
-/*
-Vue.prototype.$axios = axios.create({
-  baseURL: serviceUrl + servicePort
-});
-*/
 
 Vue.prototype.$moment = moment;
 

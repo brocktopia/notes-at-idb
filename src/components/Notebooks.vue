@@ -20,7 +20,7 @@
           <span class="notebook-date">{{$moment(notebook.Created_date).format("l")}}</span>
         </li>
       </ul>
-      <div class="notebooks-message">{{notebooksMessage}}</div>
+      <div v-if="notebooks.length === 0" class="notebooks-message">No notebooks have been created.</div>
       <div class="loading-mask" v-if="isLoading"><span>{{loadingMessage}}</span></div>
     </div>
 
@@ -52,7 +52,6 @@
     data: function() {
       return {
         notebooks:[],
-        notebooksMessage:'',
         showNewNotebook:false,
         isLoading: true,
         loadingMessage:'Loading...',
@@ -68,11 +67,6 @@
         .then(function(notebooks) {
           vm.isLoading = false;
           vm.notebooks = notebooks;
-          if (notebooks.length > 0) {
-            vm.message = '';
-          } else {
-            vm.notebooksMessage = 'No notebooks have been created.';
-          }
         })
         .then(function() {
           // Check to see if route is to notebooks-new

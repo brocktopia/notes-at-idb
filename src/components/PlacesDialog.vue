@@ -10,9 +10,9 @@
         </div>
 
         <div class="modal-body">
-          <input v-model="placeName" placeholder="Enter a place name" @input="updatePlaceSearch(placeName)">
+          <input v-model="place.name" placeholder="Enter a place name" @input="updatePlaceSearch(place.name)">
           <ul class="place-list">
-            <li class="place" v-for="place in places" v-on:click="$emit('select', place)">
+            <li class="place" v-for="place in places" @click="$emit('select', place)">
               <img :src="place.icon" width="25" height="25"/>
               <span class="place-name">{{place.name}}</span>
               <!--
@@ -44,13 +44,19 @@
   module.exports = {
 
     data: function() {return {
-      placeName:'',
       interval:null
     }},
 
     props:{
       places:Array,
+      placeName:String,
       showMore:Boolean
+    },
+
+    computed:{
+      place() {
+        return {'name': this.placeName}
+      }
     },
 
     mounted: function() {
@@ -58,15 +64,16 @@
     },
 
     methods: {
-      updatePlaceSearch: function (placeName) {
+
+      updatePlaceSearch(name) {
         //console.log('PlacesDialog.updatePlaceSearch() placeName ['+placeName+']');
         if (vm.interval) {
           clearTimeout(vm.interval);
         }
         vm.interval = setTimeout(() => {
-          vm.$emit('place', placeName);
+          vm.$emit('place', name);
           vm.interval = false;
-        }, 200);
+        }, 500);
       }
     }
 

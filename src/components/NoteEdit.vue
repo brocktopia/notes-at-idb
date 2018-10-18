@@ -67,6 +67,7 @@
     <places-dialog
       v-if="showPlacesDialog"
       :places="places"
+      :placeName="placeName"
       :showMore="showMoreButton"
       v-on:select="placeSelected"
       v-on:close="placesClose"
