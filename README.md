@@ -50,6 +50,14 @@ npm run build-dev
 npm run dev
 ```
 
+## Distribution
+
+Putting the project up on line requires the `index.html`, `serviceworkers.js` and `/dist/` build folder in the same directory. 
+The `notes-at-idb.webmanifest` needs to be in the root directory of the web server and point to resource files in the 
+application directory. In my demo, linked below, I put the project in a `/notes-at-idb/` directory in my root directory. 
+If you choose a different structure you will need to modify the [notes-at-idb.webmanifest](./notes-at-idb.webmanifest) file's 
+`icon` and `start_url` properties.
+
 ## Resources
 
 * [Geolocation API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) Documentation on navigator.geolocation from Mozilla.
