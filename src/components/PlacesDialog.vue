@@ -20,6 +20,7 @@
               -->
             </li>
           </ul>
+          <span v-if="noResults">No places found at your current location.</span>
         </div>
 
         <div class="modal-footer">
@@ -43,14 +44,15 @@
 
   module.exports = {
 
-    data: function() {return {
+    data() {return {
       interval:null
     }},
 
     props:{
-      places:Array,
-      placeName:String,
-      showMore:Boolean
+      places: Array,
+      placeName: String,
+      showMore: Boolean,
+      noResults: Boolean
     },
 
     computed:{
@@ -80,7 +82,7 @@
   };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
   input {
     width: 100%;
   }
@@ -103,8 +105,35 @@
   li.place img {
     vertical-align: middle;
   }
-  .modal-mask .modal-container {
-    width: 460px;
-    max-height: 720px;
+  /* Mobile rules */
+  @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+    .modal-mask .modal-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 140px);
+      ul.place-list {
+        max-height: calc(100vh - 320px);
+        li.place {
+          font-size: 1.2rem;
+          height: 45px;
+          img {
+            width: 40px;
+            height: 40px;
+          }
+        }
+      }
+    }
+    .modal-footer {
+      position: absolute;
+      bottom: 5px;
+      width: calc(100vw - 60px);
+    }
+  }
+  /* Non-mobile rules */
+  @media screen and (min-width: 800px) {
+    .modal-mask .modal-container {
+      width: 460px;
+      max-height: 720px;
+    }
   }
 </style>

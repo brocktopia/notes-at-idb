@@ -5,13 +5,16 @@
     <div :class="'app-container' + (mode === 'new' ? ' new' : ' edit')" v-if="activeView === 'edit-name'">
 
       <header>
-        <h2>{{mode === 'edit' ? note.name : 'New Mobile Note'}}</h2>
+        <h2>Note - {{mode === 'new' ? 'Create' : 'Edit'}}</h2>
         <span class="button-bar">
           <svg class="icon" @click="activeView = 'edit-note'"><use xlink:href="./dist/symbols.svg#arrow-forward"></use></svg>
+          <svg v-if="saveEnabled" class="icon" @click="saveNote()"><use xlink:href="./dist/symbols.svg#save"></use></svg>
         </span>
       </header>
 
-      <div class="content name-edit">
+       <div class="content name-edit">
+
+         <!-- CSS Grid requires 6 elements for layout (name, date, location, places, search, map) -->
 
         <div class="name">
           <label v-if="mode === 'edit'" for="noteName" style="font-size: smaller;">Name</label>
@@ -24,8 +27,13 @@
         <div class="date">{{$moment(note.Created_date).format('LLLL')}}</div>
 
         <div class="geocoords">
-          <svg class="icon-tiny location-icon" style="vertical-align: text-bottom;"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
-          {{note.geocode.lat +', '+note.geocode.lng}}
+          <label for="geocords">Location:</label>
+          <span v-if="hasGeocoords" id="geocords" class="link">{{note.geocode.lat +', '+note.geocode.lng}}</span>
+          <span v-if="!hasGeocoords && locationDenied" class="location-denied">Location access has been denied</span>
+          <span v-if="!hasGeocoords && !locationDenied" class="location-unknown">Your location can not be determined</span>
+          <button class="icon small bg-lt action-icon" @click="updateCoordinates(true)">
+            <svg class="icon-small"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
+          </button>
         </div>
 
         <div class="place">
@@ -38,6 +46,20 @@
             <button v-if="!hasPlace(note)" @click="findPlace()" tabindex="2">Lookup Places</button>
           </span>
         </div>
+
+         <div class="search">
+           <input
+             type="text"
+             v-model="mapSearchInput"
+             class="map-search-input"
+             placeholder="Search for location"
+             @keyup.enter="searchForLocation(mapSearchInput)"
+           >
+           <button class="icon small bg-lt" @click="searchForLocation(mapSearchInput)"><svg><use xlink:href="./dist/symbols.svg#search">
+             <title>Search</title>
+           </use></svg></button>
+           <span class="map-info">Drag marker to move location.</span>
+         </div>
 
         <gmap-map
           class="content"
@@ -57,6 +79,7 @@
 
       <div class="navigation">
         <a @click="closeNote()">Cancel</a>
+        <a v-if="saveEnabled" class="action-link" @click="saveNote()">Save</a>
         <a class="action-link" @click="activeView = 'edit-note'">Next</a>
       </div>
 
@@ -66,10 +89,10 @@
     <div class="app-container" v-if="activeView === 'edit-note'">
 
       <header>
-        <h2>{{mode === 'edit' ? note.name : 'New Mobile Note'}}</h2>
+        <h2>Note - {{mode === 'new' ? 'Create' : 'Edit'}}</h2>
         <span class="button-bar">
           <svg class="icon" @click="activeView = 'edit-name'"><use xlink:href="./dist/symbols.svg#arrow-back"></use></svg>
-          <svg class="icon" @click="saveNote()"><use xlink:href="./dist/symbols.svg#save"></use></svg>
+          <svg v-if="saveEnabled" class="icon" @click="saveNote()"><use xlink:href="./dist/symbols.svg#save"></use></svg>
         </span>
       </header>
 
@@ -79,7 +102,7 @@
 
       <div class="navigation">
         <a @click="closeNote()">Cancel</a>
-        <a class="action-link" @click="saveNote()">Save</a>
+        <a v-if="saveEnabled" class="action-link" @click="saveNote()">Save</a>
         <a class="action-link" @click="activeView = 'edit-name'">Back</a>
       </div>
     </div>
@@ -94,6 +117,26 @@
       v-on:place="placeInputUpdated"
       v-on:more="moreSelected"
     ></places-dialog>
+
+
+    <modal-dialog
+      v-if="showMessage"
+      @close="showMessage = false"
+    >
+      <h3 :class="messageClass" slot="header">{{messageTitle}}</h3>
+      <div slot="body" v-html="messageBody"></div>
+    </modal-dialog>
+
+    <modal-dialog
+      v-if="showConfirm"
+      :modalType="'yesno'"
+      @close="showConfirm = false"
+      @confirm="confirmMethod()"
+    >
+      <h3 :class="'notify'" slot="header">{{confirmTitle}}</h3>
+      <div slot="body" v-html="confirmBody"></div>
+    </modal-dialog>
+
 
   </div>
 </template>
@@ -110,48 +153,17 @@
 <style scoped>
   .app-container.edit .name-edit {
     display: grid;
-    grid-template-rows: 120px 40px 60px 60px auto;
+    grid-template-rows: 120px 40px 50px 60px 40px auto;
   }
   .app-container.new .name-edit {
     display: grid;
-    grid-template-rows: 90px 40px 60px 60px auto;
+    grid-template-rows: 90px 40px 50px 60px 40px auto;
   }
   #noteName {
     font-size: 1.8rem;
   }
   .content {
     padding: 20px;
-  }
-  span.no-place {
-    font-size: smaller;
-    color: #999999;
-  }
-  span.has-place {
-    display: inline-block;
-    max-width: 340px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: text-bottom;
-  }
-  #noteNote {
-    height: 100%;
-    font-size: 1.8rem;
-  }
-  .geocoords {
-    color: #4e7eef;
-    fill: #4e7eef;
-  }
-  .geocoords, .place {
-    height: 50px;
-    line-height: 50px;
-    width: 100%;
-  }
-  .place button {
-    vertical-align: top;
-  }
-  .place svg {
-    fill: #ed453b;
   }
   .content > * {
     margin-bottom: 10px;
@@ -172,5 +184,56 @@
   }
   .char-count-close {
     color: orangered;
+  }
+  span.no-place {
+    font-size: smaller;
+    color: #999999;
+  }
+  span.has-place {
+    display: inline-block;
+    max-width: 340px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: text-bottom;
+  }
+  .geocoords, .place {
+    height: 50px;
+    line-height: 50px;
+    width: 100%;
+  }
+  .place button {
+    vertical-align: middle;
+  }
+  .geocoords button {
+    margin-top: 10px;
+  }
+  .place svg {
+    fill: #ed453b;
+  }
+  .location-denied h4, .location-denied p {
+    margin: 0;
+  }
+  .location-denied h4 {
+    color: darkred;
+  }
+  .search {
+    margin-bottom: 0;
+  }
+  .search input {
+    display: inline-block;
+    line-height: 1em;
+    font-size: 1em;
+    width: 250px;
+  }
+  .map-info {
+    float: right;
+    font-size: smaller;
+    color: #888;
+    margin-top: 8px;
+  }
+  #noteNote {
+    height: 100%;
+    font-size: 1.8rem;
   }
 </style>

@@ -18,6 +18,13 @@ html, body {
 h1, h2 {
   font-weight: normal;
 }
+h2.main {
+  margin: 0;
+  padding: 8px 0 8px 15px;
+  color: #fff;
+  background-color: #000;
+  font-size: 1.5rem;
+}
 ul {
   list-style-type: none;
   padding: 0;
@@ -77,125 +84,38 @@ header {
     }
   }
 }
+button.icon {
+  border: none;
+  background: none;
+  padding: 0;
+  vertical-align: middle;
+  &:hover, &:focus {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  &.bg-lt {
+    &:hover, &:focus {
+      background-color: rgba(128, 128, 128, 0.3);
+    }
+  }
+  svg {
+    width: 50px;
+    height: 50px;
+  }
+  &.small {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    svg {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
 h2.warn {
   color: orangered;
-}
-/* Mobile fixes */
-@media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
-  .desktop-only {
-    display: none;
-  }
-  svg.icon-tiny, img.icon-tiny {
-    display: inline-block;
-    width: 32px;
-    height: 32px;
-  }
-  svg.icon-small, img.icon-small {
-    display: inline-block;
-    width: 36px;
-    height: 36px;
-  }
-  .app-container {
-    max-width: 100%;
-    grid-template-rows: 70px auto 70px;
-    button {
-      white-space: nowrap;
-      font-size: 1.2rem;
-      &.create-notebook {
-        font-size: 1.5rem;
-      }
-    }
-    input[type=text], textarea {
-      padding-left: 5px;
-      //text-size-adjust: 150%;
-      font-size: 1rem;
-      //line-height: 30px;
-    }
-    header {
-      h2 {
-        line-height: 70px;
-        font-size: 2rem;
-        max-width: 380px;
-        margin-left: 10px;
-        float: left;
-      }
-      .button-bar {
-        .icon {
-          margin: 10px 4px;
-        }
-      }
-    }
-    .navigation {
-      line-height: 70px;
-      font-size: 1.7rem;
-    }
-    .content {
-      height: calc(100vh - 140px);
-      font-size: 1.5rem;
-      ul .list-item {
-        height: 60px;
-        line-height: 60px;
-        font-size: 1.5rem;
-      }
-      .list-item-name {
-        max-width: 75%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      &.note-edit {
-        //text-size-adjust: 130%;
-      }
-      .note-item {
-        font-size: 1.5rem;
-        .title {
-          //text-size-adjust: 150%;
-          line-height: 1.8rem;
-        }
-        .date, .note {
-          //text-size-adjust: 140%;
-          white-space: nowrap;
-        }
-        .geocoords, .place {
-          //text-size-adjust: 130%;
-          width: 50%
-        }
-      }
-      .notebook-message {
-        //text-size-adjust: 150%;
-      }
-      &.note-edit {
-        grid-template-rows: 75px 30px 35px 35px 155px auto;
-        .name {
-          label {
-            display: block;
-          }
-        }
-      }
-    }
-    .modal-header h3 {
-      //text-size-adjust: 150%;
-    }
-    &.edit {
-      font-size: 1.5rem;
-    }
-  }
-}
-/* Non-mobile rules */
-@media screen and (min-width: 800px) {
-  .mobile-only {
-    display: none;
-  }
-  input {
-    font-size: 1rem;
-    line-height: 22px;
-    padding: 0 5px;
-    font-family: monospace;
-  }
-  textarea {
-    font-size: 1rem;
-    padding: 5px 5px;
-  }
 }
 /* icons */
 .icon {
@@ -258,10 +178,26 @@ h2.warn {
   text-align: left;
   padding: 0 10px;
   line-height: 50px;
+  color: #888;
+  .icon-button-bar {
+    float: right;
+    display: inline-block;
+    height: 100%;
+    a {
+      width: 50px;
+      height: 50px;
+      border: #42b983;
+      svg {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  }
 }
 .navigation * {
-  margin: 0 10px;
+  margin: 0 5px;
   cursor: pointer;
+  text-decoration: none;
 }
 .action-link {
   float: right;
@@ -337,12 +273,14 @@ button:active {
     }
     .modal-body input {
       width: 100%;
+      font-size: 1.8rem;
     }
     .modal-footer {
       min-height: 40px;
     }
     .modal-default-button {
       float: right;
+      margin-left: 10px;
     }
     .modal-optional-botton {
       float: left;
@@ -358,5 +296,145 @@ button:active {
       -webkit-transform: scale(1.1);
       transform: scale(1.1);
     }
+  }
+}
+.vue-map-container {
+  overflow: hidden;
+}
+/* Mobile fixes */
+@media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+  .desktop-only {
+    display: none;
+  }
+  svg.icon-tiny, img.icon-tiny {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+  }
+  svg.icon-small, img.icon-small {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+  }
+  .app-container {
+    max-width: 100%;
+    grid-template-rows: 60px auto 60px;
+    button {
+      white-space: nowrap;
+      font-size: 1.2rem;
+      &.create-notebook {
+        font-size: 1.5rem;
+      }
+    }
+    input[type=text], textarea {
+      padding-left: 5px;
+      //text-size-adjust: 150%;
+      font-size: 1rem;
+      //line-height: 30px;
+    }
+    header {
+      h2 {
+        line-height: 60px;
+        font-size: 2rem;
+        max-width: 380px;
+        margin-left: 10px;
+        float: left;
+      }
+      .button-bar {
+        .icon {
+          margin: 10px 4px;
+        }
+      }
+    }
+    .navigation {
+      line-height: 60px;
+      font-size: 1.7rem;
+      .icon-button-bar {
+        padding: 5px 0;
+      }
+    }
+    .content {
+      height: calc(100vh - 120px);
+      font-size: 1.5rem;
+      ul .list-item {
+        height: 60px;
+        line-height: 60px;
+        font-size: 1.5rem;
+      }
+      .list-item-name {
+        max-width: 75%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      &.note-edit {
+        //text-size-adjust: 130%;
+      }
+      .note-item {
+        font-size: 1.5rem;
+        .title {
+          //text-size-adjust: 150%;
+          line-height: 1.8rem;
+        }
+        .date, .note {
+          //text-size-adjust: 140%;
+          white-space: nowrap;
+        }
+        .geocoords, .place {
+          //text-size-adjust: 130%;
+          width: 50%
+        }
+      }
+      .notebook-message {
+        //text-size-adjust: 150%;
+      }
+      &.note-edit {
+        grid-template-rows: 75px 30px 35px 35px 155px auto;
+        .name {
+          label {
+            display: block;
+          }
+        }
+      }
+    }
+    .modal-header h3 {
+      //text-size-adjust: 150%;
+    }
+    &.edit {
+      font-size: 1.5rem;
+    }
+  }
+  // mobile modal dialogs
+  div.modal-mask {
+    div.modal-wrapper {
+      display: block;
+      margin: 60px 0 0;
+    }
+    div.modal-container {
+      width: 100%;
+      margin: 0;
+      input {
+        font-size: 1.8rem;
+      }
+      span.input-info {
+        font-size: unset;
+      }
+    }
+  }
+}
+/* Non-mobile rules */
+@media screen and (min-width: 800px) {
+  .mobile-only {
+    display: none;
+  }
+  input {
+    font-size: 1rem;
+    line-height: 22px;
+    padding: 0 5px;
+    font-family: monospace;
+  }
+  textarea {
+    font-size: 1rem;
+    padding: 5px 5px;
   }
 }

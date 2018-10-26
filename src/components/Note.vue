@@ -2,42 +2,55 @@
   <div class="app-container">
 
     <header>
-      <h2>{{note.name}}</h2>
+      <h2>Note</h2>
       <span class="button-bar">
-        <svg class="icon" @click="deleteNote()"><use xlink:href="./dist/symbols.svg#delete-note"></use></svg>
-        <svg class="desktop-only icon" @click="editNote()"><use xlink:href="./dist/symbols.svg#edit-note"></use></svg>
-        <svg class="mobile-only icon" @click="editNoteMobile()"><use xlink:href="./dist/symbols.svg#edit-note"></use></svg>
-        <svg v-if="showNoteMap" class="icon" @click="showNote()"><use xlink:href="./dist/symbols.svg#note"></use></svg>
-        <svg v-if="!showNoteMap" class="icon" @click="showMap()"><use xlink:href="./dist/symbols.svg#map"></use></svg>
-        <svg class="icon" @click="closeNote()"><use xlink:href="./dist/symbols.svg#close-note"></use></svg>
+         <button class="icon delete-note" @click="deleteNote()"><svg><use xlink:href="./dist/symbols.svg#delete-note">
+          <title>Delete Note</title>
+        </use></svg></button>
+        <button class="desktop-only icon edit-note" @click="editNote()"><svg><use xlink:href="./dist/symbols.svg#edit-note">
+          <title>Edit Note</title>
+        </use></svg></button>
+        <button class="mobile-only icon edit-note" @click="editNoteMobile()"><svg><use xlink:href="./dist/symbols.svg#edit-note">
+          <title>Edit Note</title>
+        </use></svg></button>
+        <button v-if="showNoteMap" class="icon show-note" @click="showNote()"><svg><use xlink:href="./dist/symbols.svg#note">
+          <title>Show Note</title>
+        </use></svg></button>
+        <button v-if="showNoteMap === false" class="icon show-map" @click="showMap()"><svg><use xlink:href="./dist/symbols.svg#map">
+          <title>Show Map</title>
+        </use></svg></button>
+        <button class="icon close-note" @click="closeNote()"><svg><use xlink:href="./dist/symbols.svg#close-note">
+          <title>Close Note</title>
+        </use></svg></button>
       </span>
     </header>
 
     <div v-if="!showNoteMap" class="content">
 
-      <div class="date">{{$moment(note.date).format('LLLL')}}</div>
+      <h2 class="main">{{note.name}}</h2>
 
-      <div class="geocoords" v-if="note.place && note.place.name">
-        <img :src="note.place.icon" class="icon-tiny" />
-        <span id="placeName">{{note.place.name}}</span>
-        <a :href="note.place.url" target="_blank" style="display: inline-block; vertical-align: middle;">
-          <svg class="icon-tiny"><use xlink:href="./dist/symbols.svg#launch"></use></svg>
-        </a>
+      <div class="body">
+
+        <div class="date">{{$moment(note.date).format('LLLL')}}</div>
+
+        <div class="geocoords" v-if="note.place && note.place.name">
+          <img :src="note.place.icon" class="icon-tiny" />
+          <span id="placeName">{{note.place.name}}</span>
+          <a :href="note.place.url" target="_blank" style="display: inline-block; vertical-align: middle;">
+            <svg class="icon-tiny"><use xlink:href="./dist/symbols.svg#launch"></use></svg>
+          </a>
+        </div>
+
+        <div class="geocoords">
+          <a @click="showMap()">
+            <svg class="icon-tiny" style="vertical-align: text-bottom;"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
+            {{note.geocode.lat +', '+note.geocode.lng}}
+          </a>
+        </div>
+
+        <p class="note">{{note.note}}</p>
+
       </div>
-
-      <div class="geocoords">
-        <a @click="showMap()">
-          <svg class="icon-tiny" style="vertical-align: text-bottom;"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
-          {{note.geocode.lat +', '+note.geocode.lng}}
-        </a>
-      </div>
-      <p class="note">{{note.note}}</p>
-    </div>
-
-    <div class="navigation">
-      <a @click="closeNote()">Back to Notebook</a>
-      <a style="float:right;" @click="nextNote()">Next &gt;</a>
-      <a style="float:right;" @click="previousNote()">&lt; Previous</a>
     </div>
 
     <gmap-map
@@ -47,11 +60,51 @@
       :center="{'lat':geoLat,'lng':geoLon}"
       :zoom="15"
     >
+      <gmap-info-window
+        :options="infoOptions"
+        :position="notePosition"
+        :opened="infoWinOpen"
+        @closeclick="infoWinOpen=false"
+      >
+        <div class="note-info" v-if="!!note">
+          <h3 style="margin: 4px 0;">{{note.name}}</h3>
+          <div>{{$moment(note.Created_date).format('l h:mm:ss a')}}</div>
+          <div v-if="hasPlace">
+            <img :src="note.place.icon" width="24" height="24"/>
+            <span>{{note.place.name}}</span>
+            <a :href="note.place.url" target="_blank">
+              <svg class="icon-tiny"><use xlink:href="./dist/symbols.svg#launch"></use></svg>
+            </a>
+          </div>
+          <p style="max-width: 300px; max-height: 280px; overflow-y: auto; white-space: pre-wrap;">{{note.note}}</p>
+        </div>
+      </gmap-info-window>
       <gmap-marker
         ref="myMarker"
-        :position="google && new google.maps.LatLng(geoLat, geoLon)"
+        :position="notePosition"
+        @click="toggleInfoWindow"
       />
     </gmap-map>
+
+    <div class="navigation">
+      <router-link to="/">Home</router-link>
+      &gt;
+      <router-link to="/notebooks">Notebooks</router-link>
+      &gt;
+      <a @click="closeNote()">Notebook</a>
+      <span v-if="noteCount > 1" class="icon-button-bar">
+        <a @click="previousNote()">
+          <svg><use xlink:href="./dist/symbols.svg#arrow-back">
+            <title>Previous Note</title>
+          </use></svg>
+        </a>
+        <a @click="nextNote()">
+          <svg><use xlink:href="./dist/symbols.svg#arrow-forward">
+            <title>Next Note</title>
+          </use></svg>
+        </a>
+      </span>
+    </div>
 
     <!-- Dynamically loaded content -->
 
@@ -77,7 +130,6 @@
   import ModalDialog from './ModalDialog'
   import {gmapApi, GmapMap} from 'vue2-google-maps'
 
-  var vm;
   export default {
 
     components: {
@@ -86,86 +138,120 @@
 
     computed: {
       google: gmapApi,
-      geoLat: function () {
-        return vm.note.geocode.lat || 0;
+      hasPlace() {
+        return (this.note.place && this.note.place._id);
       },
-      geoLon: function () {
-        return vm.note.geocode.lng || 0;
+      geoLat() {
+        return this.note.geocode.lat || 0;
+      },
+      geoLon() {
+        return this.note.geocode.lng || 0;
+      },
+      notePosition() {
+        return this.note.geocode ? {
+          lat: this.note.geocode.lat,
+          lng: this.note.geocode.lng
+        } : null;
       },
     },
 
     props: {
-      note:Object
+      note:Object,
+      noteCount:Number
     },
 
-    data: function() {
+    data() {
       return {
         showConfirmModal: false,
         isLoading: false,
         loadingMessage:'Loading...',
-        showNoteMap:false
+        showNoteMap:false,
+        infoOptions: {
+          pixelOffset: {
+            width: 0,
+            height: -35
+          }
+        },
+        infoWinOpen: true
       }
     },
 
-    mounted: function() {
-      vm = this;
+    mounted() {
+      //console.log(`Note.mounted() noteCount [${this.noteCount}]`);
     },
 
     methods: {
-      editNote:function() {
+      
+      editNote() {
         //console.log('Note.editNote()');
-        vm.$emit('edit');
+        this.$emit('edit');
       },
-      editNoteMobile:function() {
-        console.log('Note.editNoteMobile()');
-        vm.$emit('editmobile');
+      
+      editNoteMobile() {
+        //console.log('Note.editNoteMobile()');
+        this.$emit('editmobile');
       },
-      closeNote:function() {
+      
+      closeNote() {
         //console.log('Note.closeNote()');
-        vm.$emit('close');
+        this.$emit('close');
       },
-      nextNote:function() {
+      
+      nextNote() {
         //console.log('Note.nextNote()');
-        vm.$emit('next');
+        this.$emit('next');
       },
-      previousNote:function() {
+      
+      previousNote() {
         //console.log('Note.previousNote()');
-        vm.$emit('previous');
+        this.$emit('previous');
       },
-      deleteNote:function() {
+      
+      deleteNote() {
         //console.log('Note.deleteNote()');
-        vm.showConfirmModal = true;
+        this.showConfirmModal = true;
       },
-      cancelDelete:function() {
+      
+      cancelDelete() {
         //console.log('Note.cancelDelete()');
-        vm.showConfirmModal = false;
+        this.showConfirmModal = false;
       },
-      confirmDelete:function() {
+      
+      confirmDelete() {
         //console.log('Note.confirmDelete()');
-        vm.$emit('delete');
+        this.$emit('delete');
       },
-      showMap:function() {
-        //console.log('Note.showMap() lat ['+vm.geoLat+'] lng ['+vm.geoLon+']');
-        vm.showNoteMap = true;
+      
+      showMap() {
+        //console.log('Note.showMap() lat ['+this.geoLat+'] lng ['+this.geoLon+']');
+        this.showNoteMap = true;
       },
-      showNote:function() {
+      
+      showNote() {
         //console.log('Note.showNote()');
-        vm.showNoteMap = false;
+        this.showNoteMap = false;
       },
-      closeMap:function() {
+      
+      toggleInfoWindow(marker) {
+        //console.log('Note.toggleInfoWindow()');
+        this.infoWinOpen = !this.infoWinOpen;
+      },
+      
+      closeMap() {
         //console.log('closeMap()');
-        vm.showNoteMap = false;
+        this.showNoteMap = false;
       }
+      
     }
 
   }
 </script>
 
 <style scoped>
-  .content {
+  .body {
     padding: 20px;
   }
-  .content > div {
+  .body > div {
     margin: 10px 0;
   }
   .geocoords img {

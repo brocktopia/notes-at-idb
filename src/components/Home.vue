@@ -44,10 +44,10 @@
 </template>
 
 <script>
-  let vm;
+  
   export default {
 
-    data: function () {
+    data() {
       return {
         showStats:false,
         storageCapacityGB:'0',
@@ -57,12 +57,11 @@
       }
     },
 
-    mounted: function() {
+    mounted() {
       //console.log('Home.mounted()');
-      vm = this;
       // Testing for DB failure
-      if (!vm.$notesDB.isOpen()) {
-        vm.$notesDB.open()
+      if (!this.$notesDB.isOpen()) {
+        this.$notesDB.open()
           .then(() => {
             console.log('Home.mounted() $notesDB has been opened');
           })
@@ -74,34 +73,34 @@
         console.log('Home.mounted() $notesDB is already open');
       }
       // Build Stats
-      vm.showEstimatedQuota()
-        .then(function(res) {
+      this.showEstimatedQuota()
+        .then((res) => {
           console.log('Home.mounted() $notesDB.showEstimatedQuota()');
           if (!res) {
             console.log('Home.mounted() No Storage Data');
-            vm.storageCapacityGB = 'Unknown';
-            vm.storageUsedMB = 'Unknown';
+            this.storageCapacityGB = 'Unknown';
+            this.storageUsedMB = 'Unknown';
             return;
           }
           console.dir(res);
           if (!isNaN(res.quota)) {
-            vm.storageCapacityGB = (res.quota / 1000000000).toPrecision(4) + ' GB';
+            this.storageCapacityGB = (res.quota / 1000000000).toPrecision(4) + ' GB';
           }
           if (!isNaN(res.usage)) {
-            vm.storageUsedMB = (res.usage / 1000000).toPrecision(4) + ' MB';
+            this.storageUsedMB = (res.usage / 1000000).toPrecision(4) + ' MB';
           }
         });
-      vm.$notesDB.notebooks
+      this.$notesDB.notebooks
         .count()
-        .then(n => vm.notebooksCount = n)
-        .catch(vm.handleError);
-      vm.$notesDB.notes
+        .then(n => this.notebooksCount = n)
+        .catch(this.handleError);
+      this.$notesDB.notes
         .count()
-        .then(n => vm.notesCount = n)
-        .catch(vm.handleError);
+        .then(n => this.notesCount = n)
+        .catch(this.handleError);
       // Check route
-      if (vm.$route.name === 'home-stats') {
-        vm.showStats = true;
+      if (this.$route.name === 'home-stats') {
+        this.showStats = true;
       }
     },
 
@@ -117,16 +116,16 @@
     },
 
     methods: {
-      createNewNotebook: function() {
+      createNewNotebook() {
         //console.log('Home.createNewNotebook()');
-        vm.$router.push('/notebooks/new')
+        this.$router.push('/notebooks/new')
       },
       showEstimatedQuota: async function() {
         return await navigator.storage && navigator.storage.estimate ?
           navigator.storage.estimate() :
           undefined;
       },
-      handleError: function(err) {
+      handleError(err) {
         console.warn('Home.handleError()');
         console.dir(err);
       }

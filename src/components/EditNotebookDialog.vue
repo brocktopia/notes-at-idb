@@ -11,7 +11,15 @@
         </div>
 
         <div class="modal-body">
-          <input type="text" id="notebookName" v-model="notebook.name" maxlength="40" placeholder="Enter a name">
+          <input
+            type="text"
+            id="notebookName"
+            ref="nameInput"
+            v-model="notebook.name"
+            maxlength="40"
+            placeholder="Enter a name"
+            @keyup.enter="$emit('save', notebook)"
+          >
           <span v-if="typeof(notebook.name) === 'string'" class="input-info">
             Maximum 40 characters (<span :class="notebook.name.length < 30 ? 'char-count' : 'char-count-close'">{{40 - notebook.name.length}}</span> remaining)
           </span>
@@ -34,7 +42,8 @@
 </template>
 
 <script>
-  module.exports = {
+  export default {
+
     props: {
       mode:{
         type:String,
@@ -44,14 +53,17 @@
         type: Object,
         required: true
       }
+    },
+
+    mounted() {
+      //console.log(`EditNotebookDialog.mounted()`);
+      this.$refs.nameInput.focus();
     }
+
   };
 </script>
 
 <style scoped>
-  .modal-mask .modal-container {
-    width: 450px;
-  }
   .input-info {
     font-size: smaller;
   }

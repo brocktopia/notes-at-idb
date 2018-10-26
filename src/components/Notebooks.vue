@@ -42,14 +42,13 @@
 <script>
   import EditNotebookDialog from './EditNotebookDialog'
 
-  var vm;
   export default {
 
     components:{
       EditNotebookDialog
     },
 
-    data: function() {
+    data() {
       return {
         notebooks:[],
         showNewNotebook:false,
@@ -59,63 +58,68 @@
       }
     },
 
-    mounted: function() {
-      //console.log('Notebooks.mounted()');
-      vm = this;
-      vm.$notesDB.notebooks
+    mounted() {
+      console.log('Notebooks.mounted()');
+      this.$notesDB.notebooks
         .toArray()
-        .then(function(notebooks) {
-          vm.isLoading = false;
-          vm.notebooks = notebooks;
+        .then((notebooks) => {
+          this.isLoading = false;
+          this.notebooks = notebooks;
         })
-        .then(function() {
+        .then(() => {
           // Check to see if route is to notebooks-new
-          if (vm.$route.name === 'notebooks-new') {
-            vm.showNewNotebook = true;
+          if (this.$route.name === 'notebooks-new') {
+            this.showNewNotebook = true;
           }
         })
-        .catch(vm.handleError);
+        .catch(this.handleError);
     },
 
     methods:{
-      notebookSelect: function(notebook) {
+
+      notebookSelect(notebook) {
         //console.log('Notebooks.notebookSelect() notebook');
-        vm.$router.push('/notebook/'+notebook._id);
+        this.$router.push('/notebook/'+notebook._id);
       },
-      addNotebook: function() {
+
+      addNotebook() {
         //console.log('Notebooks.addNotebook()');
         // initialize a new notebook instance
-        vm.notebookBaseObj = {name:'', Created_date: new Date()};
-        vm.showNewNotebook = true;
-        vm.$router.replace('/notebooks/new');
+        this.notebookBaseObj = {name:'', Created_date: new Date()};
+        this.showNewNotebook = true;
+        this.$router.replace('/notebooks/new');
       },
-      cancelNewNotebook: function() {
+
+      cancelNewNotebook() {
         //console.log('Notebooks.cancelNewNotebook()');
         // clear notebookBaseObj
-        vm.notebookBaseObj = {};
-        vm.showNewNotebook = false;
-        vm.$router.replace('/notebooks');
+        this.notebookBaseObj = {};
+        this.showNewNotebook = false;
+        this.$router.replace('/notebooks');
       },
-      saveNewNotebook: function(notebook) {
+
+      saveNewNotebook(notebook) {
         //console.log('Notebooks.saveNewNotebook()');
-        vm.$notesDB.notebooks.add(notebook)
+        this.$notesDB.notebooks.add(notebook)
           .then(id => {
             console.log('Notebooks.saveNewNotebook() notebook ['+id+'] added');
             notebook._id = id;
-            vm.notebooks.unshift(notebook);
+            this.notebooks.unshift(notebook);
             // clear notebookBaseObj
-            vm.notebookBaseObj = {};
-            vm.showNewNotebook = false;
-            vm.$router.replace('/notebooks');
+            this.notebookBaseObj = {};
+            this.showNewNotebook = false;
+            this.$router.replace('/notebooks');
           })
           .catch(error => console.log(error));
       }
     },
-    handleError: function(err) {
+
+    handleError(err) {
       console.warn('Notebooks.handleError()');
       console.dir(err);
-      vm.isLoading = false;
+      this.isLoading = false;
     }
+
   }
 </script>
 

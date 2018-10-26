@@ -65,7 +65,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules|serviceworkers\.js$/
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
@@ -80,7 +80,8 @@ module.exports = {
   devServer: {
     historyApiFallback: true,
     noInfo: true,
-    overlay: true
+    overlay: true,
+    port: 8081
   },
   performance: {
     hints: false
@@ -103,7 +104,8 @@ if (process.env.NODE_ENV === 'production') {
     new UglifyJsPlugin({
       uglifyOptions: {
         compress: {
-          warnings: false
+          warnings: false,
+          drop_console: true
         }
       },
       sourceMap: true,

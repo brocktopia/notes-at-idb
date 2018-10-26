@@ -2,14 +2,20 @@
   <div class="app-container edit">
 
     <header>
-      <h2>{{mode === 'edit' ? note.name : 'New Note'}}</h2>
+      <h2>Note - Edit</h2>
       <span class="button-bar">
-        <svg class="icon action-icon" @click="closeNote()"><use xlink:href="./dist/symbols.svg#close-note"></use></svg>
-        <svg class="icon action-icon" v-on:click="saveNote()"><use xlink:href="./dist/symbols.svg#save"></use></svg>
+        <button class="icon" @click="saveNote()"><svg><use xlink:href="./dist/symbols.svg#save">
+          <title>Save Note</title>
+        </use></svg></button>
+        <button class="icon" @click="closeNote()"><svg><use xlink:href="./dist/symbols.svg#close-note">
+          <title>Cancel Edit</title>
+        </use></svg></button>
       </span>
     </header>
 
     <div class="content note-edit">
+
+      <!-- CSS Grid requires 7 elements for layout (name, date, location, places, search, map & note) -->
 
       <div class="name">
         <label for="noteName">Name</label>
@@ -21,8 +27,10 @@
 
       <div class="geocoords">
         <label for="geocords">Location:</label>
-        <span id="geocords" class="link">{{note.geocode.lat +', '+note.geocode.lng}}</span>
-        <svg class="icon-small action-icon" v-on:click="updateCoordinates()"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
+        <span v-if="hasGeocoords" id="geocords" class="link">{{note.geocode.lat +', '+note.geocode.lng}}</span>
+        <span v-if="!hasGeocoords && locationDenied" class="location-denied">Location access has been denied</span>
+        <span v-if="!hasGeocoords && !locationDenied" class="location-unknown">Your location can not be determined</span>
+        <svg class="icon-small action-icon" @click="updateCoordinates(true)"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
       </div>
 
       <div class="place">
@@ -32,11 +40,26 @@
         <label v-if="hasPlace(note)" for="placeName">
           <img :src="note.place.icon" width="24" height="24" />
         </label>
-        <span :class="note.place && note.place._id ? 'has-place' : 'no-place'" id="placeName">{{note.place && note.place._id ? note.place.name : 'Click the button to add a place'}}</span>
-        <span style="float:right;">
+        <span v-if="hasGeocoords" :class="note.place && note.place._id ? 'has-place' : 'no-place'" id="placeName">{{note.place && note.place._id ? note.place.name : 'Click the button to lookup a place'}}</span>
+        <span v-if="hasGeocoords" style="float:right;">
           <button class="small" v-if="note.place && note.place._id" @click="clearPlace()" style="margin-right: 10px;">Remove Place</button>
           <button class="small" @click="findPlace()" tabindex="2">Lookup Places</button>
         </span>
+        <span v-if="!hasGeocoords" class="no-place">Places not currently enabled</span>
+      </div>
+
+      <div class="search">
+        <input
+          type="text"
+          v-model="mapSearchInput"
+          class="map-search-input"
+          placeholder="Search for location"
+          @keyup.enter="searchForLocation(mapSearchInput)"
+        >
+        <button class="icon small bg-lt" @click="searchForLocation(mapSearchInput)"><svg><use xlink:href="./dist/symbols.svg#search">
+          <title>Search</title>
+        </use></svg></button>
+        <span class="map-info">Drag marker to move location.</span>
       </div>
 
       <gmap-map
@@ -69,11 +92,30 @@
       :places="places"
       :placeName="placeName"
       :showMore="showMoreButton"
-      v-on:select="placeSelected"
-      v-on:close="placesClose"
-      v-on:place="placeInputUpdated"
-      v-on:more="moreSelected"
+      :noResults="noPlaceResults"
+      @select="placeSelected"
+      @close="placesClose"
+      @place="placeInputUpdated"
+      @more="moreSelected"
     ></places-dialog>
+
+    <modal-dialog
+      v-if="showMessage"
+      @close="showMessage = false"
+    >
+      <h3 :class="messageClass" slot="header">{{messageTitle}}</h3>
+      <div slot="body" v-html="messageBody"></div>
+    </modal-dialog>
+
+    <modal-dialog
+      v-if="showConfirm"
+      :modalType="'yesno'"
+      @close="showConfirm = false"
+      @confirm="confirmMethod()"
+    >
+      <h3 :class="'notify'" slot="header">{{confirmTitle}}</h3>
+      <div slot="body" v-html="confirmBody"></div>
+    </modal-dialog>
 
   </div>
 </template>
@@ -88,42 +130,13 @@
 </script>
 
 <style scoped>
-  span.no-place {
-    font-size: smaller;
-    color: #999999;
-  }
-  span.has-place {
-    display: inline-block;
-    max-width: 340px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: text-bottom;
-  }
   .content {
-    padding: 20px 20px 8px;
+    padding: 8px 20px;
     display: grid;
-    grid-template-rows: 45px 30px 35px 35px 155px auto;
-  }
-  .note-input {
-    flex: auto;
-  }
-  #noteNote {
-    height: 100%;
-  }
-  .geocoords, .place {
-    height: 30px;
-    line-height: 30px;
-    width: 100%;
-  }
-  .place button {
-    vertical-align: top;
-  }
-  .place svg {
-    fill: #ed453b;
+    grid-template-rows: 45px 30px 35px 35px 30px 155px auto;
   }
   .content > * {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .content > *:last-child {
     margin-bottom: 0;
@@ -141,5 +154,44 @@
   }
   .char-count {
     color: orangered;
+  }
+  .geocoords, .place {
+    height: 30px;
+    line-height: 30px;
+    width: 100%;
+  }
+  .place button {
+    vertical-align: top;
+  }
+  .place svg {
+    fill: #ed453b;
+  }
+  span.no-place {
+    font-size: smaller;
+    color: #999999;
+  }
+  span.has-place {
+    display: inline-block;
+    max-width: 340px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: text-bottom;
+  }
+  .search {
+    margin-bottom: 0;
+  }
+  .search input {
+    display: inline-block;
+    width: 250px;
+  }
+  .map-info {
+    float: right;
+    font-size: smaller;
+    color: #888;
+    margin-top: 8px;
+  }
+  #noteNote {
+    height: 100%;
   }
 </style>
