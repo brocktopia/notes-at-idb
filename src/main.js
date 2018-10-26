@@ -7,6 +7,8 @@ import * as VueGoogleMaps from 'vue2-google-maps'
 import googleConfig from './google-maps-config'
 import './css/style.scss'
 import './assets/svg/symbols.svg'
+import './assets/notes-at-icon-192.png'
+import './assets/notes-at-icon-512.png'
 
 Vue.use(VueGoogleMaps, {
   load: googleConfig
