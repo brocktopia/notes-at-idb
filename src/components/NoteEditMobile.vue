@@ -62,7 +62,6 @@
          </div>
 
         <gmap-map
-          class="content"
           ref="NoteMap"
           :center="{'lat':geoLat,'lng':geoLon}"
           :zoom="15"
@@ -118,7 +117,6 @@
       v-on:more="moreSelected"
     ></places-dialog>
 
-
     <modal-dialog
       v-if="showMessage"
       @close="showMessage = false"
@@ -136,7 +134,6 @@
       <h3 :class="'notify'" slot="header">{{confirmTitle}}</h3>
       <div slot="body" v-html="confirmBody"></div>
     </modal-dialog>
-
 
   </div>
 </template>
@@ -210,12 +207,6 @@
   }
   .place svg {
     fill: #ed453b;
-  }
-  .location-denied h4, .location-denied p {
-    margin: 0;
-  }
-  .location-denied h4 {
-    color: darkred;
   }
   .search {
     margin-bottom: 0;

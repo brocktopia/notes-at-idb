@@ -226,6 +226,7 @@ export default {
             lng: Number(place.geometry.location.lng().toFixed(7))
           };
           vm.$emit('place', placeObj, latlonObj);
+          // hide the 2 potential dialogs that call this method
           vm.showPlacesDialog = false;
           vm.showConfirm = false;
         } else {
@@ -267,8 +268,8 @@ export default {
         if (status === 'OK') {
           const loc = res[0];
           this.note.geocode = this.note.geocode || {};
-          this.$set(this.note.geocode, 'lat', loc.geometry.location.lat());
-          this.$set(this.note.geocode, 'lng', loc.geometry.location.lng());
+          this.$set(this.note.geocode, 'lat', Number(loc.geometry.location.lat().toFixed(7)));
+          this.$set(this.note.geocode, 'lng', Number(loc.geometry.location.lng().toFixed(7)));
           if (loc.place_id) {
             this.confirmTitle = 'Add Place';
             this.confirmBody = `Your search for "${location}" found place information for <img src="${loc.icon}" width="25" height="25" style="vertical-align: middle;"><b>${loc.name}</b>. Would you like to save this with your note?`;

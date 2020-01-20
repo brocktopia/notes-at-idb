@@ -44,9 +44,11 @@
 
   module.exports = {
 
-    data() {return {
-      interval:null
-    }},
+    data() {
+      return {
+        interval:null
+      }
+    },
 
     props:{
       places: Array,

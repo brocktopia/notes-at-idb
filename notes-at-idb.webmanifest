@@ -4,12 +4,12 @@
   "description": "A note taking app that stores geolocation data with each note so you can keep track of \"where\" the note was created.",
   "icons": [
     {
-      "src": "/notes-at-idb/dist/notes-at-icon-192.png",
+      "src": "./dist/notes-at-icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/notes-at-idb/dist/notes-at-icon-512.png",
+      "src": "./dist/notes-at-icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

@@ -31,20 +31,34 @@
 
       <div class="body">
 
-        <div class="date">{{$moment(note.date).format('LLLL')}}</div>
+        <gmap-map
+          class="note-view-map"
+          v-if="showNoteMap"
+          ref="NoteMap"
+          :center="{'lat':geoLat,'lng':geoLon}"
+          :zoom="15"
+        >
+          <gmap-marker
+            ref="myMarker"
+            :position="notePosition"
+            @click="toggleInfoWindow"
+          />
+        </gmap-map>
 
-        <div class="geocoords" v-if="note.place && note.place.name">
-          <img :src="note.place.icon" class="icon-tiny" />
-          <span id="placeName">{{note.place.name}}</span>
-          <a :href="note.place.url" target="_blank" style="display: inline-block; vertical-align: middle;">
-            <svg class="icon-tiny"><use xlink:href="./dist/symbols.svg#launch"></use></svg>
-          </a>
-        </div>
+        <div class="date">{{$moment(note.date).format('LLLL')}}</div>
 
         <div class="geocoords">
           <a @click="showMap()">
             <svg class="icon-tiny" style="vertical-align: text-bottom;"><use xlink:href="./dist/symbols.svg#my-location"></use></svg>
             {{note.geocode.lat +', '+note.geocode.lng}}
+          </a>
+        </div>
+
+        <div class="places" v-if="note.place && note.place.name">
+          <img :src="note.place.icon" class="icon-tiny" />
+          <span id="placeName">{{note.place.name}}</span>
+          <a :href="note.place.url" target="_blank" style="display: inline-block; vertical-align: middle;">
+            <svg class="icon-tiny"><use xlink:href="./dist/symbols.svg#launch"></use></svg>
           </a>
         </div>
 
@@ -248,16 +262,32 @@
 </script>
 
 <style scoped>
+  .content {
+    overflow: hidden;
+  }
   .body {
+    height: calc(100% - 40px);
     padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   .body > div {
     margin: 10px 0;
   }
-  .geocoords img {
+  .note-view-map {
+    float: right;
+    width: 200px;
+    height: 150px;
+  }
+  .date, .geocoords, .places {
+    float: left;
+    clear: left;
+  }
+  .places img {
     vertical-align: middle;
   }
   .note {
+    clear:both;
     white-space: pre-wrap;
   }
   a svg {
